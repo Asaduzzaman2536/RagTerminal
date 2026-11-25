@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1036748144656",
+    "firebase_url": "https://sky-cheat-d8fc8-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "sky-cheat-d8fc8",
+    "storage_bucket": "sky-cheat-d8fc8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036748144656:android:8204abcf9bb71bce4f8a95",
+        "android_client_info": {
+          "package_name": "rag.tarminal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBr0E0jxzVbwmoLKg1QfPtGfpQdj6e45s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
