@@ -1,0 +1,47 @@
+[versions]
+agp = "8.7.3"
+androidDatabaseSqlcipher = "4.5.4"
+appcompat = "1.7.1"
+ipaddress = "5.4.0"
+koinCore = "3.5.0"
+krate = "2.0.0"
+material = "1.13.0"
+constraintlayout = "2.2.1"
+firebaseBom = "33.8.0"
+firebaseAuth = "23.1.0"
+firebaseDatabase = "21.0.0"
+core = "6.0.0"
+lsposed = "0.6.0"
+navigationFragmentKtx = "2.7.7"
+navigationUiKtx = "2.7.7"
+preferenceKtx = "1.2.1"
+securityAppAuthenticator = "1.0.0-alpha03"
+securityCrypto = "1.1.0-alpha06"
+viewbindingpropertydelegate = "1.5.9"
+
+[libraries]
+android-database-sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version.ref = "androidDatabaseSqlcipher" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+ipaddress = { module = "com.github.seancfoley:ipaddress", version.ref = "ipaddress" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinCore" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koinCore" }
+krate = { module = "hu.autsoft:krate", version.ref = "krate" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
+core = { module = "com.github.topjohnwu.libsu:core", version.ref = "core" }
+navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationUiKtx" }
+navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
+security-app-authenticator = { module = "androidx.security:security-app-authenticator", version.ref = "securityAppAuthenticator" }
+security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+service = { module = "com.github.topjohnwu.libsu:service", version.ref = "core" }
+nio = { module = "com.github.topjohnwu.libsu:nio", version.ref = "core" }
+viewbindingpropertydelegate = { module = "com.github.kirich1409:viewbindingpropertydelegate", version.ref = "viewbindingpropertydelegate" }
+viewbindingpropertydelegate-noreflection = { module = "com.github.kirich1409:viewbindingpropertydelegate-noreflection", version.ref = "viewbindingpropertydelegate" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+lsparanoid = { id = "org.lsposed.lsparanoid", version.ref = "lsposed" }
