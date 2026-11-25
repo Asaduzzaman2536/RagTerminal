@@ -1,0 +1,351 @@
+
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.gradle.api.tasks.Copy
+
+plugins {
+    alias libs.plugins.android.application
+    alias libs.plugins.lsparanoid
+    id 'kotlin-android'
+    id 'com.google.gms.google-services'
+}
+
+// ==========================================
+// LSPARANOID
+// ==========================================
+
+lsparanoid {
+    seed = null
+    classFilter = null
+    includeDependencies = false
+    variantFilter = { true }
+}
+
+// ==========================================
+// ANDROID
+// ==========================================
+
+android {
+
+    ndkVersion "24.0.8215888"
+    compileSdk 34
+
+    namespace 'rag.tarminal'
+
+    defaultConfig {
+
+        applicationId "rag.tarminal"
+
+        minSdkVersion 28
+        targetSdkVersion 34
+
+        versionCode = 20251201
+        versionName = "4.0"
+
+        vectorDrawables.useSupportLibrary = true
+
+        ndk {
+            abiFilters "arm64-v8a"
+        }
+    }
+
+    // ======================================
+    // SOURCE SETS
+    // ======================================
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jniLibs']
+            assets.srcDirs = ['src/main/assets']
+        }
+    }
+
+    // ======================================
+    // SIGNING
+    // ======================================
+
+    signingConfigs {
+        release_sign {
+            storeFile file('../panel_baba.jks')
+            storePassword '168175'
+            keyPassword '168175'
+            keyAlias 'Panel Baba Official'
+        }
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            debuggable true
+            jniDebuggable true
+            versionNameSuffix "-debug"
+        }
+
+        release {
+            minifyEnabled true
+            debuggable false
+            jniDebuggable false
+            crunchPngs false
+            shrinkResources false
+            multiDexEnabled false
+
+            proguardFiles getDefaultProguardFile(
+                'proguard-android-optimize.txt'
+            ), 'proguard-rules.pro'
+
+            if (file('../panel_baba.jks').exists()) {
+                signingConfig signingConfigs.release_sign
+            }
+        }
+    }
+
+    // ======================================
+    // BUILD FEATURES
+    // ======================================
+
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+    }
+
+    // ======================================
+    // JAVA
+    // ======================================
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // ======================================
+    // PACKAGING
+    // ======================================
+
+    packagingOptions {
+        jniLibs {
+            keepDebugSymbols += ['**/*.so']
+            useLegacyPackaging true
+        }
+    }
+
+    // ======================================
+    // LINT
+    // ======================================
+
+    lint {
+        abortOnError false
+    }
+}
+
+// ==========================================
+// KOTLIN
+// ==========================================
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+    }
+}
+
+// ==========================================
+// CONFIGURATIONS
+// ==========================================
+
+configurations {
+    download {
+        transitive false
+    }
+}
+
+// ==========================================
+// DEPENDENCIES
+// ==========================================
+
+dependencies {
+
+    download libs.krate
+    download libs.koin.core
+    download libs.koin.android
+
+    implementation libs.krate
+    implementation libs.koin.core
+    implementation libs.koin.android
+
+    implementation libs.viewbindingpropertydelegate
+    implementation libs.viewbindingpropertydelegate.noreflection
+
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.core
+    implementation libs.service
+    implementation libs.nio
+
+    implementation fileTree(
+        dir: "libs",
+        include: ["*.jar"]
+    )
+}
+
+// ==========================================
+// DOWNLOAD DEPENDENCIES
+// ==========================================
+
+tasks.register('downloadDependencies', Copy) {
+
+    from configurations.download
+
+    into "libs"
+}
+
+// ==========================================
+// NDK PATHS
+// ==========================================
+
+def ndkDirectory = android.ndkDirectory
+
+def ndkBuildExecutable = new File(
+    ndkDirectory,
+    "ndk-build"
+)
+
+def existingNdkBuildDir = file(
+    "$buildDir/ndk-existing"
+)
+
+def ragNativeBuildDir = file(
+    "$buildDir/ndk-rag-native"
+)
+
+// Existing Android.mk
+def existingNdkMk = file(
+    "src/main/jni/Android.mk"
+)
+
+def existingNdkAppMk = file(
+    "src/main/jni/Application.mk"
+)
+
+// New executable Android.mk
+def ragNativeMk = file(
+    "src/main/cpp/Android.mk"
+)
+
+def ragNativeAppMk = file(
+    "src/main/cpp/Application.mk"
+)
+
+// IMPORTANT:
+// ndk-build executable output is under obj/local/ABI/
+def ragNativeExecutable = file(
+    "$buildDir/ndk-rag-native/obj/local/arm64-v8a/RagNativeExternal"
+)
+
+
+// ==========================================
+// BUILD EXISTING SHARED LIBRARIES
+// libClient.so
+// libDriverck.so
+// ==========================================
+
+tasks.register('runNdkBuild', Exec) {
+
+    enabled = existingNdkMk.isFile() &&
+              existingNdkAppMk.isFile() &&
+              ndkBuildExecutable.isFile()
+
+    executable = ndkBuildExecutable.absolutePath
+
+    args = [
+        "NDK_PROJECT_PATH=${existingNdkBuildDir.absolutePath}",
+        "NDK_OUT=${existingNdkBuildDir.absolutePath}/obj",
+        "NDK_LIBS_OUT=${projectDir}/src/main/jniLibs",
+        "APP_BUILD_SCRIPT=${existingNdkMk.absolutePath}",
+        "NDK_APPLICATION_MK=${existingNdkAppMk.absolutePath}"
+    ]
+}
+
+
+// ==========================================
+// BUILD RAG NATIVE EXECUTABLE
+// ==========================================
+
+tasks.register('buildRagNativeExecutable', Exec) {
+
+    enabled = ragNativeMk.isFile() &&
+              ragNativeAppMk.isFile() &&
+              ndkBuildExecutable.isFile()
+
+    executable = ndkBuildExecutable.absolutePath
+
+    args = [
+        "NDK_PROJECT_PATH=${ragNativeBuildDir.absolutePath}",
+        "NDK_OUT=${ragNativeBuildDir.absolutePath}/obj",
+        "NDK_LIBS_OUT=${ragNativeBuildDir.absolutePath}/libs",
+        "NDK_LIBS_OUT=${projectDir}/src/main/cpp/outputs",                
+        "APP_BUILD_SCRIPT=${ragNativeMk.absolutePath}",
+        "NDK_APPLICATION_MK=${ragNativeAppMk.absolutePath}",
+        "APP_ABI=arm64-v8a"
+    ]
+}
+
+
+// ==========================================
+// COPY EXECUTABLE INTO ASSETS
+// ==========================================
+
+tasks.register('copyRagNativeExecutable', Copy) {
+
+    dependsOn 'buildRagNativeExecutable'
+
+    from(ragNativeExecutable)
+
+    into(file("src/main/assets"))
+
+    rename {
+        "RagNativeExternal"
+    }
+}
+
+
+// ==========================================
+// PREBUILD DEPENDENCIES
+// ==========================================
+
+tasks.named('preBuild') {
+
+    dependsOn 'runNdkBuild'
+
+    dependsOn 'copyRagNativeExecutable'
+}
+
+
+// ==========================================
+// COPY ALL BUILD OUTPUTS
+// ==========================================
+
+def externalBuildOutput = new File(
+    project.projectDir,
+    "build/outputs"
+)
+
+tasks.register("copyAllBuildOutputs", Copy) {
+
+    from(layout.buildDirectory.dir("outputs"))
+
+    into(externalBuildOutput)
+
+    includeEmptyDirs = true
+}
+
+
+// ==========================================
+// AUTO COPY AFTER DEBUG / RELEASE
+// ==========================================
+
+tasks.configureEach { task ->
+
+    if (task.name == "assembleDebug" ||
+        task.name == "assembleRelease") {
+
+        task.finalizedBy("copyAllBuildOutputs")
+    }
+}
